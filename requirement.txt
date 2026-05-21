@@ -1,0 +1,15 @@
+# Data
+pandas
+numpy
+
+# ML
+scikit-learn
+xgboost
+imbalanced-learn
+
+# Visualisation
+matplotlib
+seaborn
+
+# Notebooks
+jupyter
