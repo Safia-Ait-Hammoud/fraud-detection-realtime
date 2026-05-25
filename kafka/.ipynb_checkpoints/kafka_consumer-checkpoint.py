@@ -13,7 +13,7 @@ from kafka import KafkaConsumer
 # ── Configuration ─────────────────────────────────────────────
 KAFKA_BROKER  = 'localhost:9092'
 TOPIC_NAME    = 'bank-transactions'
-MODEL_PATH    = 'models/rf_fraud_model.pkl'   # path to your pkl
+MODEL_PATH    = 'models/xgb_fraud_model.pkl'   # path to your pkl
 FRAUD_THRESHOLD = 0.5                          # probability above = FRAUD
 
 # ── Load your trained Random Forest model ─────────────────────
