@@ -1,0 +1,5 @@
+-- 03_create_indexes.sql
+-- Note technique : BigQuery utilise une architecture en colonnes. 
+-- L'optimisation des performances ne se fait pas via des index traditionnels (CREATE INDEX).
+-- Elle est gérée via le PARTITION BY (processing_timestamp) et le CLUSTER BY (is_fraud) 
+-- définis lors de la création de la table (02_create_tables.sql).
