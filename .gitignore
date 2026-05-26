@@ -8,3 +8,5 @@ venv/
 
 # Data
 *.csv
+
+gcp-credentials.json

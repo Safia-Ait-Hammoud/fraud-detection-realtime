@@ -1,0 +1,6 @@
+# Configuration de la base de données BigQuery
+type: "bigquery"
+project_id: "fraud-detection-project-497521"
+dataset_id: "fraud_detection"
+tables:
+  transactions: "transactions"
