@@ -1,30 +1,46 @@
--- 04_create_views.sql
+-- database/sql/04_create_views.sql
 
--- Vue 1 : Volume de transactions par minute (Pour le Panel Grafana "Transactions/seconde")
-CREATE OR REPLACE VIEW fraud_detection.vw_transactions_per_minute AS
-SELECT 
-    TIMESTAMP_TRUNC(processing_timestamp, MINUTE) as processing_minute,
-    COUNT(*) as total_transactions
-FROM fraud_detection.transactions
-GROUP BY processing_minute;
-
--- Vue 2 : Statistiques de fraude globales (Taux de fraude, Montant moyen)
+-- 1. Vue pour la courbe d'évolution temporelle
 CREATE OR REPLACE VIEW fraud_detection.vw_fraud_statistics AS
 SELECT 
-    COUNTIF(is_fraud = TRUE) as total_frauds,
-    COUNT(*) as total_transactions,
-    (COUNTIF(is_fraud = TRUE) / COUNT(*)) * 100 as fraud_rate_percentage,
-    AVG(CASE WHEN is_fraud = TRUE THEN amount ELSE NULL END) as avg_fraudulent_amount
-FROM fraud_detection.transactions;
+    window_start as time,
+    total_transactions,
+    total_frauds,
+    fraud_rate_percentage,
+    avg_fraudulent_amount
+FROM 
+    fraud_detection.fraud_stats
+ORDER BY 
+    window_start DESC;
 
--- Vue 3 : Top des montants frauduleux récents (Pour le Panel Grafana "Top montants")
+-- 2. Vue pour le tableau des fraudes récentes
 CREATE OR REPLACE VIEW fraud_detection.vw_recent_top_frauds AS
 SELECT 
+    processing_timestamp as time,
     transaction_id,
     amount,
-    confidence_score,
-    processing_timestamp
-FROM fraud_detection.transactions
-WHERE is_fraud = TRUE
-ORDER BY amount DESC, processing_timestamp DESC
-LIMIT 50;
+    merchant_category,
+    foreign_transaction,
+    confidence_score
+FROM 
+    fraud_detection.transactions
+WHERE 
+    is_fraud = 1
+ORDER BY 
+    processing_timestamp DESC
+LIMIT 100;
+
+-- 3. NOUVELLE VUE : Répartition de la fraude par catégorie de marchand
+CREATE OR REPLACE VIEW fraud_detection.vw_fraud_by_merchant AS
+SELECT 
+    merchant_category,
+    COUNT(*) as fraud_count,
+    SUM(amount) as total_fraud_amount
+FROM 
+    fraud_detection.transactions
+WHERE 
+    is_fraud = 1
+GROUP BY 
+    merchant_category
+ORDER BY 
+    fraud_count DESC;
