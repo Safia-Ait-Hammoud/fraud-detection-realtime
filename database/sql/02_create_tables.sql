@@ -2,13 +2,14 @@
 
 -- 1. Création de la table principale qui stockera le flux temps réel
 CREATE TABLE IF NOT EXISTS fraud_detection.transactions (
-    transaction_id INT64 NOT NULL,
+    transaction_id STRING NOT NULL,
+    timestamp STRING,
     amount FLOAT64,
     transaction_hour INT64,
     merchant_category STRING,
     foreign_transaction INT64,
     location_mismatch INT64,
-    device_trust_score INT64,
+    device_trust_score FLOAT64,
     velocity_last_24h INT64,
     cardholder_age INT64,
     

@@ -3,7 +3,7 @@
 from pyspark.sql.types import StructType, StructField, StringType, FloatType, IntegerType
 from pyspark.sql.functions import col, from_json
 
-# 1. Le schéma STRICT basé sur le contrat de données officiel (features.md)
+# 1. Le schéma
 kafka_schema = StructType([
     StructField("transaction_id", StringType(), True),
     StructField("timestamp", StringType(), True),

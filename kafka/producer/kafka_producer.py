@@ -11,13 +11,14 @@ from transaction_simulator import generate_smart_transaction
 # Initialisation du producteur Kafka
 producer = KafkaProducer(
     bootstrap_servers=KAFKA_BROKER,
-    value_serializer=lambda v: json.dumps(v).encode('utf-8')
+    value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+    api_version=(3, 7, 0)
 )
 
 def start_smart_stream():
     """Envoie un flux infini de transactions simulées intelligemment."""
-    print(f"Démarrage du Smart Simulator → Topic : '{TOPIC_NAME}'")
-    print(f"⏱Fréquence : 1 message toutes les {INTERVAL_SEC} secondes")
+    print(f"Démarrage du Smart Simulator | Topic : '{TOPIC_NAME}'")
+    print(f"Fréquence : 1 message toutes les {INTERVAL_SEC} secondes")
     print("-" * 60)
 
     count = 0

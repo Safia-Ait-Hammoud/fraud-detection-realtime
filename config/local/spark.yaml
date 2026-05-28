@@ -1,0 +1,28 @@
+# Configuration du moteur de traitement PySpark
+type: "spark"
+app_name: "FraudDetection_Streaming_Pipeline"
+master: "local[*]"
+
+# Dépendances Maven (Le remède anti-JAR Hell)
+dependencies:
+  spark_version: "3.5.0"
+  scala_version: "2.12"
+  packages:
+    - "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0"
+    - "com.google.cloud.spark:spark-bigquery-with-dependencies_2.12:0.36.1"
+    - "javax.inject:javax.inject:1"
+
+# Options d'exécution Java (Contournement des sécurités Java 21/17)
+java_options:
+  - "--add-opens=java.base/java.nio=ALL-UNNAMED"
+  - "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED"
+  - "--add-opens=java.base/java.lang=ALL-UNNAMED"
+
+# Configuration du Streaming et de BigQuery
+streaming:
+  output_mode: "append"
+  checkpoint_dir: "C:/Temp/spark_checkpoints"
+
+bigquery_options:
+  write_method: "direct"          # Évite d'utiliser un bucket GCS intermédiaire
+  allow_field_addition: "true"    # Permet l'évolution du schéma si le ML ajoute des colonnes
