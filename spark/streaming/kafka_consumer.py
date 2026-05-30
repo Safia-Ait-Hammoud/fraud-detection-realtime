@@ -1,19 +1,17 @@
-# spark/streaming/kafka_consumer.py
-
-from pyspark.sql.types import StructType, StructField, StringType, FloatType, IntegerType
+from pyspark.sql.types import StructType, StructField, StringType, DoubleType, IntegerType
 from pyspark.sql.functions import col, from_json
 
 # 1. Le schéma
 kafka_schema = StructType([
     StructField("transaction_id", StringType(), True),
     StructField("timestamp", StringType(), True),
-    StructField("amount", FloatType(), True),
+    StructField("amount", DoubleType(), True),
     StructField("transaction_hour", IntegerType(), True),
-    StructField("merchant_category", StringType(), True),  # <-- Réintégré selon le contrat !
+    StructField("merchant_category", StringType(), True), 
     StructField("foreign_transaction", IntegerType(), True),
     StructField("location_mismatch", IntegerType(), True),
-    StructField("device_trust_score", FloatType(), True),
-    StructField("velocity_last_24h", IntegerType(), True),
+    StructField("device_trust_score", DoubleType(), True),
+    StructField("velocity_last_24h", DoubleType(), True),
     StructField("cardholder_age", IntegerType(), True)
 ])
 

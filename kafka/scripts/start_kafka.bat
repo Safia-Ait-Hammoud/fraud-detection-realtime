@@ -1,6 +1,6 @@
 @echo off
 echo =========================================
-echo 🚀 Demarrage de l'infrastructure Kafka
+echo Demarrage de l'infrastructure Kafka
 echo =========================================
 
 :: 1. Démarrage de Zookeeper
@@ -15,5 +15,5 @@ echo [2/2] Lancement du Broker Kafka...
 set PROJECT_DIR=%~dp0..\..
 start "Kafka Broker" cmd /k "cd C:\kafka && bin\windows\kafka-server-start.bat "%PROJECT_DIR%\kafka\config\server.properties""
 
-echo ✅ Les serveurs sont lances !
+echo Les serveurs sont lances !
 pause

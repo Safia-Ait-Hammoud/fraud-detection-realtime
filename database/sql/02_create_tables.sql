@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS fraud_detection.transactions (
     foreign_transaction INT64,
     location_mismatch INT64,
     device_trust_score FLOAT64,
-    velocity_last_24h INT64,
+    velocity_last_24h FLOAT64,
     cardholder_age INT64,
     
     -- Résultats de l'inférence ML
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS fraud_detection.transactions (
     confidence_score FLOAT64,
     
     -- Métadonnées du pipeline
-    processing_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+    processing_timestamp TIMESTAMP
 )
 PARTITION BY DATE(processing_timestamp)
 -- Le clustering sur la catégorie de marchand optimisera les requêtes du dashboard
