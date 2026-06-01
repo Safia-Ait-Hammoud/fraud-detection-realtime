@@ -3,6 +3,9 @@ spark-job.py — Job Spark Structured Streaming (Docker version)
 Remplace les chemins Windows par des variables d'environnement Docker.
 Utilise le vrai modèle XGBoost des collègues ML.
 """
+from spark_streaming_app.kafka_alert_producer import publish_alert
+from spark_streaming_app.bigquery_writer import write_batch
+from spark_streaming_app.ml_inference import apply_ml_model
 import sys
 import os
 import logging
@@ -11,14 +14,11 @@ from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import from_json, col, current_timestamp
 from pyspark.sql.types import (
     StructType, StringType, DoubleType,
-    IntegerType, FloatType, TimestampType
+    IntegerType
 )
 
 sys.path.insert(0, "/app")
 
-from spark_streaming_app.ml_inference        import apply_ml_model
-from spark_streaming_app.bigquery_writer     import write_batch
-from spark_streaming_app.kafka_alert_producer import publish_alert
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ SCHEMA = StructType() \
 
 # ── Lecture Kafka ─────────────────────────────────────────────────────────────
 KAFKA_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
-KAFKA_TOPIC   = os.getenv("KAFKA_TOPIC", "bank-transactions")
+KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "bank-transactions")
 
 raw_stream = spark.readStream \
     .format("kafka") \
@@ -72,6 +72,8 @@ scored = apply_ml_model(transactions) \
     .withColumn("processed_at", current_timestamp())
 
 # ── foreachBatch : BigQuery + alertes Kafka ───────────────────────────────────
+
+
 def process_batch(batch_df: DataFrame, batch_id: int):
     rows = [r.asDict() for r in batch_df.collect()]
     if not rows:
@@ -85,6 +87,7 @@ def process_batch(batch_df: DataFrame, batch_id: int):
         publish_alert(txn)
     if frauds:
         log.info("Batch %d — %d fraude(s) détectée(s) 🚨", batch_id, len(frauds))
+
 
 # ── Démarrer le streaming ─────────────────────────────────────────────────────
 query = scored.writeStream \

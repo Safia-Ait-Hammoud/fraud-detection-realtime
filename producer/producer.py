@@ -11,12 +11,13 @@ from kafka import KafkaProducer
 from kafka.errors import KafkaError
 
 # ── Config depuis variables d'environnement ───────────────────────────────────
-KAFKA_BROKER  = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
-TOPIC_NAME    = os.getenv("KAFKA_TOPIC", "bank-transactions")
-INTERVAL_SEC  = float(os.getenv("PUBLISH_RATE_MS", "500")) / 1000.0
+KAFKA_BROKER = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
+TOPIC_NAME = os.getenv("KAFKA_TOPIC", "bank-transactions")
+INTERVAL_SEC = float(os.getenv("PUBLISH_RATE_MS", "500")) / 1000.0
 
 # ── Seuils ML (identiques à ml_inference.py) ─────────────────────────────────
 AMOUNT_Q75 = 242.48
+
 
 def generate_smart_transaction() -> dict:
     """
@@ -24,15 +25,16 @@ def generate_smart_transaction() -> dict:
     Reproduit exactement la logique du transaction_simulator.py original.
     """
     is_fraud_attempt = random.random() < 0.015
-    is_stealth_fraud  = random.random() < 0.10
+    is_stealth_fraud = random.random() < 0.10
 
     if not is_fraud_attempt:
-        amount   = max(0.50, random.gauss(45, 20)) if random.random() < 0.8 else random.uniform(150, 500)
-        hour     = int(random.gauss(14, 4)) % 24
-        if hour < 6: hour += 6
-        foreign  = 1 if random.random() < 0.05 else 0
+        amount = max(0.50, random.gauss(45, 20)) if random.random() < 0.8 else random.uniform(150, 500)
+        hour = int(random.gauss(14, 4)) % 24
+        if hour < 6:
+            hour += 6
+        foreign = 1 if random.random() < 0.05 else 0
         mismatch = 1 if random.random() < 0.05 else 0
-        trust    = round(random.uniform(0.7, 1.0), 4)
+        trust = round(random.uniform(0.7, 1.0), 4)
         velocity = float(random.randint(1, 2)) if random.random() < 0.8 else float(random.randint(3, 5))
         merchant = random.choices(
             ["Food", "Grocery", "Clothing", "Travel", "Electronics"],
@@ -41,24 +43,24 @@ def generate_smart_transaction() -> dict:
         age = int(random.gauss(35, 12))
 
     elif is_stealth_fraud:
-        amount   = round(random.uniform(130, 149), 2)
-        hour     = random.randint(6, 8)
-        foreign  = 0
+        amount = round(random.uniform(130, 149), 2)
+        hour = random.randint(6, 8)
+        foreign = 0
         mismatch = 0
-        trust    = round(random.uniform(0.4, 0.6), 4)
+        trust = round(random.uniform(0.4, 0.6), 4)
         velocity = 2.0
         merchant = "Electronics"
-        age      = random.randint(60, 80)
+        age = random.randint(60, 80)
 
     else:
-        amount   = round(random.uniform(500, 2000), 2) if random.random() > 0.2 else round(random.uniform(0.1, 5.0), 2)
-        hour     = random.randint(0, 5)
-        foreign  = 1
+        amount = round(random.uniform(500, 2000), 2) if random.random() > 0.2 else round(random.uniform(0.1, 5.0), 2)
+        hour = random.randint(0, 5)
+        foreign = 1
         mismatch = 1
-        trust    = round(random.uniform(0.0, 0.2), 4)
+        trust = round(random.uniform(0.0, 0.2), 4)
         velocity = float(random.randint(8, 25))
         merchant = random.choices(["Travel", "Electronics"], weights=[60, 40])[0]
-        age      = random.randint(18, 65)
+        age = random.randint(18, 65)
 
     age = max(18, min(age, 90))
 
