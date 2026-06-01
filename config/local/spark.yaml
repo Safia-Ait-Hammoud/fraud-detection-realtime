@@ -1,3 +1,4 @@
+---
 # Configuration du moteur de traitement PySpark
 type: "spark"
 app_name: "FraudDetection_Streaming_Pipeline"
@@ -26,3 +27,4 @@ streaming:
 bigquery_options:
   write_method: "direct"          # Évite d'utiliser un bucket GCS intermédiaire
   allow_field_addition: "true"    # Permet l'évolution du schéma si le ML ajoute des colonnes
+  

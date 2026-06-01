@@ -1,3 +1,4 @@
+---
 # provisioning/datasources/prometheus.yml
 # Connecte automatiquement Grafana à Prometheus au démarrage
 
@@ -10,3 +11,4 @@ datasources:
     url: http://prometheus:9090
     isDefault: true
     editable: false
+    

@@ -1,3 +1,4 @@
+---
 # Configuration de l'infrastructure Kafka
 type: "kafka"
 broker: "localhost:9092"
@@ -12,3 +13,4 @@ producer:
 consumer:
   starting_offsets: "latest"
   fail_on_data_loss: "false" # Empêche Spark de crasher si Kafka supprime de vieux messages
+  

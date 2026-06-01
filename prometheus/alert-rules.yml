@@ -1,3 +1,4 @@
+---
 # alert-rules.yml — règles d'alerte Prometheus
 groups:
   - name: fraud_detection
@@ -32,3 +33,4 @@ groups:
         annotations:
           summary: "Kafka consumer lag élevé"
           description: "Lag = {{ $value }} messages"
+          

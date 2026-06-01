@@ -1,3 +1,4 @@
+---
 # provisioning/dashboards/dashboard.yml
 # Dit à Grafana où trouver les fichiers JSON des dashboards
 
@@ -9,3 +10,4 @@ providers:
     type: file
     options:
       path: /var/lib/grafana/dashboards
+      
