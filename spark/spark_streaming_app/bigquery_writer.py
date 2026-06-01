@@ -2,6 +2,7 @@
 bigquery_writer.py — BigQuery Sink for Spark Structured Streaming
 Writes fraud-scored transactions to the BigQuery emulator.
 """
+
 import logging
 import os
 
@@ -24,9 +25,7 @@ def _insert_rows(rows: list[dict]) -> bool:
     Falls back gracefully if the emulator is unreachable.
     """
     url = f"{BASE_URL}/datasets/{DATASET_ID}/tables/{TABLE_ID}/insertAll"
-    payload = {
-        "rows": [{"insertId": r.get("transaction_id", ""), "json": r} for r in rows]
-    }
+    payload = {"rows": [{"insertId": r.get("transaction_id", ""), "json": r} for r in rows]}
     try:
         resp = requests.post(url, json=payload, timeout=5)
         if resp.status_code == 200:

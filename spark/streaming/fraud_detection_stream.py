@@ -19,7 +19,7 @@ os.environ["SPARK_LOCAL_DIRS"] = r"C:\Temp"
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-dotenv_path = BASE_DIR / 'config' / '.env'
+dotenv_path = BASE_DIR / "config" / ".env"
 
 if dotenv_path.exists():
     load_dotenv(dotenv_path=dotenv_path)
@@ -27,37 +27,42 @@ if dotenv_path.exists():
 
 def create_spark_session():
     gcp_credentials = os.environ.get(
-        "GOOGLE_APPLICATION_CREDENTIALS",
-        str(BASE_DIR / "config" / "gcp-credentials.json")
+        "GOOGLE_APPLICATION_CREDENTIALS", str(BASE_DIR / "config" / "gcp-credentials.json")
     )
 
-    spark_packages = ",".join([
-        "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0",
-        "com.google.cloud.spark:spark-bigquery-with-dependencies_2.12:0.36.1",
-    ])
+    spark_packages = ",".join(
+        [
+            "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0",
+            "com.google.cloud.spark:spark-bigquery-with-dependencies_2.12:0.36.1",
+        ]
+    )
 
-    return SparkSession.builder \
-        .appName("FraudDetection_Streaming_Pipeline") \
-        .config("spark.pyspark.python",        "C:\\fraud\\venv\\Scripts\\python.exe") \
-        .config("spark.pyspark.driver.python", "C:\\fraud\\venv\\Scripts\\python.exe") \
-        .config("spark.hadoop.hadoop.home.dir", "C:\\hadoop") \
-        .master("local[*]") \
-        .config("spark.jars.packages", spark_packages) \
-        .config("spark.sql.execution.arrow.pyspark.enabled", "true") \
-        .config("spark.local.dir", "C:\\spark-tmp") \
-        .config("spark.files.overwrite", "true") \
-        .config("spark.driver.extraJavaOptions",
-                "--add-opens=java.base/java.nio=ALL-UNNAMED "
-                "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED "
-                "--add-opens=java.base/java.lang=ALL-UNNAMED") \
-        .config("spark.executor.extraJavaOptions",
-                "--add-opens=java.base/java.nio=ALL-UNNAMED "
-                "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED") \
-        .config("spark.hadoop.hadoop.home.dir", "C:\\hadoop") \
-        .config("spark.hadoop.google.cloud.auth.service.account.enable", "true") \
-        .config("spark.hadoop.google.cloud.auth.service.account.json.keyfile", gcp_credentials) \
-        .config("credentialsFile", gcp_credentials) \
+    return (
+        SparkSession.builder.appName("FraudDetection_Streaming_Pipeline")
+        .config("spark.pyspark.python", "C:\\fraud\\venv\\Scripts\\python.exe")
+        .config("spark.pyspark.driver.python", "C:\\fraud\\venv\\Scripts\\python.exe")
+        .config("spark.hadoop.hadoop.home.dir", "C:\\hadoop")
+        .master("local[*]")
+        .config("spark.jars.packages", spark_packages)
+        .config("spark.sql.execution.arrow.pyspark.enabled", "true")
+        .config("spark.local.dir", "C:\\spark-tmp")
+        .config("spark.files.overwrite", "true")
+        .config(
+            "spark.driver.extraJavaOptions",
+            "--add-opens=java.base/java.nio=ALL-UNNAMED "
+            "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED "
+            "--add-opens=java.base/java.lang=ALL-UNNAMED",
+        )
+        .config(
+            "spark.executor.extraJavaOptions",
+            "--add-opens=java.base/java.nio=ALL-UNNAMED " "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
+        )
+        .config("spark.hadoop.hadoop.home.dir", "C:\\hadoop")
+        .config("spark.hadoop.google.cloud.auth.service.account.enable", "true")
+        .config("spark.hadoop.google.cloud.auth.service.account.json.keyfile", gcp_credentials)
+        .config("credentialsFile", gcp_credentials)
         .getOrCreate()
+    )
 
 
 def main():
@@ -65,6 +70,7 @@ def main():
     spark.sparkContext.setLogLevel("WARN")
 
     import os
+
     streaming_dir = os.path.dirname(os.path.abspath(__file__))
     spark.sparkContext.addPyFile(os.path.join(streaming_dir, "ml_inference.py"))
     spark.sparkContext.addPyFile(os.path.join(streaming_dir, "kafka_consumer.py"))

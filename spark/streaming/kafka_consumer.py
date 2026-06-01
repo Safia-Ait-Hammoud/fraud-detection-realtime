@@ -2,18 +2,20 @@ from pyspark.sql.types import StructType, StructField, StringType, DoubleType, I
 from pyspark.sql.functions import col, from_json
 
 # 1. Le schéma
-kafka_schema = StructType([
-    StructField("transaction_id", StringType(), True),
-    StructField("timestamp", StringType(), True),
-    StructField("amount", DoubleType(), True),
-    StructField("transaction_hour", IntegerType(), True),
-    StructField("merchant_category", StringType(), True),
-    StructField("foreign_transaction", IntegerType(), True),
-    StructField("location_mismatch", IntegerType(), True),
-    StructField("device_trust_score", DoubleType(), True),
-    StructField("velocity_last_24h", DoubleType(), True),
-    StructField("cardholder_age", IntegerType(), True)
-])
+kafka_schema = StructType(
+    [
+        StructField("transaction_id", StringType(), True),
+        StructField("timestamp", StringType(), True),
+        StructField("amount", DoubleType(), True),
+        StructField("transaction_hour", IntegerType(), True),
+        StructField("merchant_category", StringType(), True),
+        StructField("foreign_transaction", IntegerType(), True),
+        StructField("location_mismatch", IntegerType(), True),
+        StructField("device_trust_score", DoubleType(), True),
+        StructField("velocity_last_24h", DoubleType(), True),
+        StructField("cardholder_age", IntegerType(), True),
+    ]
+)
 
 
 def read_from_kafka(spark, bootstrap_servers="localhost:9092", topic="bank-transactions"):
@@ -23,14 +25,14 @@ def read_from_kafka(spark, bootstrap_servers="localhost:9092", topic="bank-trans
     """
     print(f"Tentative de connexion au broker Kafka : {bootstrap_servers} sur le topic '{topic}'...")
 
-    return spark \
-        .readStream \
-        .format("kafka") \
-        .option("kafka.bootstrap.servers", bootstrap_servers) \
-        .option("subscribe", topic) \
-        .option("startingOffsets", "latest") \
-        .option("failOnDataLoss", "false") \
+    return (
+        spark.readStream.format("kafka")
+        .option("kafka.bootstrap.servers", bootstrap_servers)
+        .option("subscribe", topic)
+        .option("startingOffsets", "latest")
+        .option("failOnDataLoss", "false")
         .load()
+    )
 
 
 def parse_kafka_payload(df_raw):
@@ -41,8 +43,6 @@ def parse_kafka_payload(df_raw):
     """
     df_string = df_raw.selectExpr("CAST(value AS STRING) as json_string")
 
-    df_parsed = df_string \
-        .select(from_json(col("json_string"), kafka_schema).alias("data")) \
-        .select("data.*")
+    df_parsed = df_string.select(from_json(col("json_string"), kafka_schema).alias("data")).select("data.*")
 
     return df_parsed

@@ -124,11 +124,7 @@ def get_stats():
             return {
                 "total_transactions": row.total_transactions,
                 "fraud_count": row.fraud_count,
-                "fraud_rate": (
-                    row.fraud_count / row.total_transactions
-                    if row.total_transactions > 0
-                    else 0
-                ),
+                "fraud_rate": (row.fraud_count / row.total_transactions if row.total_transactions > 0 else 0),
                 "avg_fraud_score": row.avg_fraud_score,
             }
         return {

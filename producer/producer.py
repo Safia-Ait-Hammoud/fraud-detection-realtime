@@ -2,6 +2,7 @@
 producer.py — Kafka Transaction Producer (Docker version)
 Adapté depuis kafka/producer/kafka_producer.py + transaction_simulator.py
 """
+
 import json
 import time
 import random
@@ -37,8 +38,7 @@ def generate_smart_transaction() -> dict:
         trust = round(random.uniform(0.7, 1.0), 4)
         velocity = float(random.randint(1, 2)) if random.random() < 0.8 else float(random.randint(3, 5))
         merchant = random.choices(
-            ["Food", "Grocery", "Clothing", "Travel", "Electronics"],
-            weights=[40, 30, 15, 10, 5]
+            ["Food", "Grocery", "Clothing", "Travel", "Electronics"], weights=[40, 30, 15, 10, 5]
         )[0]
         age = int(random.gauss(35, 12))
 
@@ -65,16 +65,16 @@ def generate_smart_transaction() -> dict:
     age = max(18, min(age, 90))
 
     return {
-        "transaction_id":     f"TXN-{random.randint(100000, 999999)}",
-        "timestamp":          datetime.now().isoformat(),
-        "amount":             round(amount, 2),
-        "transaction_hour":   hour,
-        "merchant_category":  merchant,
+        "transaction_id": f"TXN-{random.randint(100000, 999999)}",
+        "timestamp": datetime.now().isoformat(),
+        "amount": round(amount, 2),
+        "transaction_hour": hour,
+        "merchant_category": merchant,
         "foreign_transaction": foreign,
-        "location_mismatch":  mismatch,
+        "location_mismatch": mismatch,
         "device_trust_score": trust,
-        "velocity_last_24h":  velocity,
-        "cardholder_age":     age,
+        "velocity_last_24h": velocity,
+        "cardholder_age": age,
     }
 
 

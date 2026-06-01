@@ -1,6 +1,7 @@
 """
 kafka_alert_producer.py — Publishes fraud alerts back to Kafka topic.
 """
+
 import json
 import logging
 import os

@@ -13,14 +13,24 @@ MODEL_DIR = Path("C:/fraud/ml-models/trained")
 VELOCITY_MEDIAN = 2.0
 AMOUNT_Q75 = 242.48
 AMOUNT_BINS = [-np.inf, 39.35, 90.48, 160.39, 285.8, np.inf]
-BIN_LABELS = ['Très Faible', 'Faible', 'Moyen', 'Élevé', 'Très Élevé']
+BIN_LABELS = ["Très Faible", "Faible", "Moyen", "Élevé", "Très Élevé"]
 
 # Ordre exact des colonnes attendues par le modèle
 FEATURE_COLS = [
-    'amount', 'amount_log', 'transaction_hour', 'is_night',
-    'foreign_transaction', 'location_mismatch', 'device_trust_score',
-    'velocity_last_24h', 'cardholder_age', 'high_amount', 'high_velocity',
-    'risk_score', 'merchant_category_enc', 'amount_bin_enc'
+    "amount",
+    "amount_log",
+    "transaction_hour",
+    "is_night",
+    "foreign_transaction",
+    "location_mismatch",
+    "device_trust_score",
+    "velocity_last_24h",
+    "cardholder_age",
+    "high_amount",
+    "high_velocity",
+    "risk_score",
+    "merchant_category_enc",
+    "amount_bin_enc",
 ]
 
 # Variables globales pour éviter de recharger les modèles à chaque transaction
@@ -42,47 +52,55 @@ def load_ml_artifacts():
     return _model, _scaler, _merchant_enc, _amount_enc
 
 
-ml_output_schema = StructType([
-    StructField("is_fraud", IntegerType(), True),
-    StructField("confidence_score", DoubleType(), True)
-])
+ml_output_schema = StructType(
+    [StructField("is_fraud", IntegerType(), True), StructField("confidence_score", DoubleType(), True)]
+)
 
 # ─── 3. PANDAS UDF ───
 
 
 @pandas_udf(ml_output_schema)
-def predict_fraud_udf(amount: pd.Series, hour: pd.Series, merchant: pd.Series,
-                      foreign: pd.Series, mismatch: pd.Series, trust: pd.Series,
-                      velocity: pd.Series, age: pd.Series) -> pd.DataFrame:
+def predict_fraud_udf(
+    amount: pd.Series,
+    hour: pd.Series,
+    merchant: pd.Series,
+    foreign: pd.Series,
+    mismatch: pd.Series,
+    trust: pd.Series,
+    velocity: pd.Series,
+    age: pd.Series,
+) -> pd.DataFrame:
 
     model, scaler, merchant_enc, amount_enc = load_ml_artifacts()
 
     # Étape A : Reconstruire les données brutes
-    df = pd.DataFrame({
-        'amount': amount,
-        'transaction_hour': hour,
-        'merchant_category': merchant,
-        'foreign_transaction': foreign,
-        'location_mismatch': mismatch,
-        'device_trust_score': trust,
-        'velocity_last_24h': velocity,
-        'cardholder_age': age
-    })
+    df = pd.DataFrame(
+        {
+            "amount": amount,
+            "transaction_hour": hour,
+            "merchant_category": merchant,
+            "foreign_transaction": foreign,
+            "location_mismatch": mismatch,
+            "device_trust_score": trust,
+            "velocity_last_24h": velocity,
+            "cardholder_age": age,
+        }
+    )
 
     # Étape B : Ingénierie des caractéristiques
-    df['amount_log'] = np.log1p(df['amount'])
-    df['is_night'] = (df['transaction_hour'] < 6).astype(int)
-    df['high_amount'] = (df['amount'] > AMOUNT_Q75).astype(int)
-    df['high_velocity'] = (df['velocity_last_24h'] > VELOCITY_MEDIAN).astype(int)
-    df['risk_score'] = df['foreign_transaction'] + df['location_mismatch'] + df['high_velocity']
+    df["amount_log"] = np.log1p(df["amount"])
+    df["is_night"] = (df["transaction_hour"] < 6).astype(int)
+    df["high_amount"] = (df["amount"] > AMOUNT_Q75).astype(int)
+    df["high_velocity"] = (df["velocity_last_24h"] > VELOCITY_MEDIAN).astype(int)
+    df["risk_score"] = df["foreign_transaction"] + df["location_mismatch"] + df["high_velocity"]
 
     # Étape C : Application des encodeurs
-    df['amount_bin'] = pd.cut(df['amount'], bins=AMOUNT_BINS, labels=BIN_LABELS)
-    df['amount_bin_enc'] = amount_enc.transform(df['amount_bin'].astype(str))
+    df["amount_bin"] = pd.cut(df["amount"], bins=AMOUNT_BINS, labels=BIN_LABELS)
+    df["amount_bin_enc"] = amount_enc.transform(df["amount_bin"].astype(str))
 
     # (Sécurité pour éviter que le pipeline plante si un nouveau marchand apparaît)
     known_merchants = set(merchant_enc.classes_)
-    df['merchant_category_enc'] = df['merchant_category'].apply(
+    df["merchant_category_enc"] = df["merchant_category"].apply(
         lambda x: merchant_enc.transform([x])[0] if x in known_merchants else 0
     )
 
@@ -98,10 +116,13 @@ def predict_fraud_udf(amount: pd.Series, hour: pd.Series, merchant: pd.Series,
     else:
         probabilities = [float(p) for p in predictions]
 
-    return pd.DataFrame({
-        "is_fraud": pd.Series(predictions).astype("int32"),
-        "confidence_score": pd.Series(probabilities).astype("float64")
-    })
+    return pd.DataFrame(
+        {
+            "is_fraud": pd.Series(predictions).astype("int32"),
+            "confidence_score": pd.Series(probabilities).astype("float64"),
+        }
+    )
+
 
 # ─── 4. L'APPEL DE LA FONCTION POUR LE STREAMING ───
 
@@ -122,14 +143,15 @@ def apply_ml_model(df_transactions):
             col("location_mismatch"),
             col("device_trust_score"),
             col("velocity_last_24h"),
-            col("cardholder_age")
-        )
+            col("cardholder_age"),
+        ),
     )
 
     # On éclate le résultat pour avoir des colonnes propres pour BigQuery
-    df_final = df_enrichi \
-        .withColumn("is_fraud", col("ml_results.is_fraud")) \
-        .withColumn("confidence_score", col("ml_results.confidence_score")) \
+    df_final = (
+        df_enrichi.withColumn("is_fraud", col("ml_results.is_fraud"))
+        .withColumn("confidence_score", col("ml_results.confidence_score"))
         .drop("ml_results")
+    )
 
     return df_final
