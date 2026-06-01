@@ -1,29 +1,29 @@
+from database_writer import start_bigquery_stream
+from ml_inference import apply_ml_model
+from kafka_consumer import read_from_kafka, parse_kafka_payload
+from pyspark.sql import SparkSession
+from dotenv import load_dotenv
+from pathlib import Path
 import os
-import sys
 
 VENV_PYTHON = "C:\\fraud\\venv\\Scripts\\python.exe"
 
-os.environ["PYSPARK_PYTHON"]        = VENV_PYTHON
+os.environ["PYSPARK_PYTHON"] = VENV_PYTHON
 os.environ["PYSPARK_DRIVER_PYTHON"] = VENV_PYTHON
-os.environ["HADOOP_HOME"]           = "C:\\hadoop"
+os.environ["HADOOP_HOME"] = "C:\\hadoop"
 
-from pathlib import Path
-from dotenv import load_dotenv
-from pyspark.sql import SparkSession
 
 # Configuration spécifique Windows
 os.environ["JAVA_HOME"] = r"C:\Program Files\Eclipse Adoptium\jdk-17.0.6.10-hotspot"
 os.environ["SPARK_LOCAL_DIRS"] = r"C:\Temp"
 
-from kafka_consumer import read_from_kafka, parse_kafka_payload
-from ml_inference import apply_ml_model
-from database_writer import start_bigquery_stream
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 dotenv_path = BASE_DIR / 'config' / '.env'
 
 if dotenv_path.exists():
     load_dotenv(dotenv_path=dotenv_path)
+
 
 def create_spark_session():
     gcp_credentials = os.environ.get(
@@ -40,7 +40,7 @@ def create_spark_session():
         .appName("FraudDetection_Streaming_Pipeline") \
         .config("spark.pyspark.python",        "C:\\fraud\\venv\\Scripts\\python.exe") \
         .config("spark.pyspark.driver.python", "C:\\fraud\\venv\\Scripts\\python.exe") \
-        .config("spark.hadoop.hadoop.home.dir","C:\\hadoop") \
+        .config("spark.hadoop.hadoop.home.dir", "C:\\hadoop") \
         .master("local[*]") \
         .config("spark.jars.packages", spark_packages) \
         .config("spark.sql.execution.arrow.pyspark.enabled", "true") \
@@ -58,6 +58,7 @@ def create_spark_session():
         .config("spark.hadoop.google.cloud.auth.service.account.json.keyfile", gcp_credentials) \
         .config("credentialsFile", gcp_credentials) \
         .getOrCreate()
+
 
 def main():
     spark = create_spark_session()
@@ -87,6 +88,7 @@ def main():
     except KeyboardInterrupt:
         print("\n Arrêt manuel du pipeline PySpark.")
         query.stop()
+
 
 if __name__ == "__main__":
     main()
