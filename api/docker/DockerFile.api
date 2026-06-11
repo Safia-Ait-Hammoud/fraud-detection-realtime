@@ -1,0 +1,45 @@
+# ==============================================================================
+# Dockerfile pour l'API REST de Détection de Fraude (FastAPI)
+# Projet d'Ingénierie - Architecture Temps Réel Distribuable
+# ==============================================================================
+
+# Étape 1 : Utilisation d'une image officielle Python légère
+FROM python:3.11.9-slim-bookworm
+
+# Configuration des variables d'environnement système pour Python
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV API_PORT=8000
+
+# Définition du répertoire de travail au sein du conteneur
+WORKDIR /app
+
+# Installation des dépendances système minimales
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Étape 2 : Gestion des dépendances (optimisation du cache)
+COPY requirements.txt /app/
+
+# Installation des packages Python sans cache
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
+
+# Étape 3 : Copie de l'application
+COPY . /app/
+
+# Étape 4 : Sécurisation de l'environnement
+RUN useradd -u 8888 appuser && chown -R appuser:appuser /app
+USER appuser
+
+# Exposition du port réseau de l'API
+EXPOSE ${API_PORT}
+
+# Vérification de l'état de santé du conteneur
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:${API_PORT}/ || exit 1
+
+# Étape 5 : Commande de lancement
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]

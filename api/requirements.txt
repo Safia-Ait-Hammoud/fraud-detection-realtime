@@ -1,0 +1,9 @@
+# Framework Web et Serveur
+fastapi
+uvicorn[standard]
+
+# Validation des données
+pydantic
+
+# Base de données
+google-cloud-bigquery
