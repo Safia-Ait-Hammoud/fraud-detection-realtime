@@ -67,7 +67,7 @@ def create_spark_session():
 
 def main():
     spark = create_spark_session()
-    spark.sparkContext.setLogLevel("WARN")
+    spark.sparkContext.setLogLevel("FATAL")
 
     import os
 
