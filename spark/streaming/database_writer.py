@@ -33,7 +33,8 @@ def write_batch_to_bigquery(df_batch, batch_id):
             processing_time = time.time() - start_time
             latency_gauge.set(processing_time)
             
-            push_to_gateway('localhost:9091', job='spark_streaming', registry=registry)
+            pushgateway_target = 'localhost:9091' if os.name == 'nt' else 'pushgateway:9091'
+            push_to_gateway(pushgateway_target, job='spark_streaming', registry=registry)
             
             print(f"[Metrics] Total cumulé envoyé : {tx_counter._value._value} Tx, {fraud_counter._value._value} Fraudes")
         except Exception as metric_err:
