@@ -140,7 +140,7 @@ services:
       - KAFKA_BROKER=kafka:9092
       - GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp-credentials.json
       - SPARK_SUBMIT_ARGS=--driver-memory 512m --executor-memory 512m
-      - PROJECT_ID=fraud-detection-project-497521p
+      - PROJECT_ID=fraud-detection-project-497521
     volumes:
       - ./config:/app/config:ro
       - ./ml-models:/app/ml-models
