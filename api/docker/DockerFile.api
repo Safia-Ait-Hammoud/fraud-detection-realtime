@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Étape 2 : Gestion des dépendances (optimisation du cache)
-COPY requirements.txt /app/
+COPY api/requirements.txt /app/
 
 # Installation des packages Python sans cache
 RUN pip install --no-cache-dir --upgrade pip \
