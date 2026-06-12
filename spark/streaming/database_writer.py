@@ -40,7 +40,7 @@ def write_batch_to_bigquery(df_batch, batch_id):
             print(f"[Metrics Warning] Impossible d'atteindre le Pushgateway : {metric_err}")
 
 
-        project_id = os.environ.get("PROJECT_ID", "").strip().strip('"')
+        project_id = os.environ.get("PROJECT_ID", "fraud-detection-project-497521").strip().strip('"')
         credentials_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "").strip().strip('"')
         table_name = f"{project_id}.fraud_detection.transactions"
 
