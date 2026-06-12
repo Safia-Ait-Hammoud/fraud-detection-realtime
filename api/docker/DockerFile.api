@@ -28,7 +28,7 @@ RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 # Étape 3 : Copie de l'application
-COPY . /app/
+COPY api/ /app/
 
 # Étape 4 : Sécurisation de l'environnement
 RUN useradd -u 8888 appuser && chown -R appuser:appuser /app
