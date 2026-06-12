@@ -1,0 +1,25 @@
+# On utilise une image de base avec Java (requis pour Spark) et Python
+FROM eclipse-temurin:17-jre-jammy
+
+# Installation de Python et des dépendances système
+RUN apt-get update && apt-get install -y python3 python3-pip && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Installation de PySpark et des librairies nécessaires
+# (On a bien gardé pyspark==3.5.0 pour éviter le conflit Scala)
+RUN pip install pyspark==3.5.0 kafka-python prometheus-client python-dotenv joblib scikit-learn pandas pyarrow pathlib xgboost
+
+# On copie tes scripts de streaming
+COPY spark/streaming/fraud_detection_stream.py ./
+COPY spark/streaming/kafka_consumer.py ./
+COPY spark/streaming/ml_inference.py ./
+COPY spark/streaming/database_writer.py ./
+
+# On copie la config
+COPY config/ ./config/
+
+COPY ml-models/ ./ml-models/
+
+# Commande de lancement
+CMD ["python3", "fraud_detection_stream.py"]

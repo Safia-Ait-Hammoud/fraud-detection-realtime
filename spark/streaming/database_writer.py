@@ -1,20 +1,44 @@
 import os
+import time
 from pyspark.sql.functions import col, current_timestamp
 from pyspark.sql.types import LongType, DoubleType
 
+from prometheus_client import CollectorRegistry, Counter, Gauge, push_to_gateway
+
+registry = CollectorRegistry()
+tx_counter = Counter('transactions_processed_total', 'Transactions traitées par Spark', registry=registry)
+fraud_counter = Counter('frauds_detected_total', 'Fraudes détectées par le modèle', registry=registry)
+latency_gauge = Gauge('processing_latency_seconds', 'Latence de traitement du micro-batch', registry=registry)
 
 def write_batch_to_bigquery(df_batch, batch_id):
     """
-    Écrit un micro-batch vers BigQuery.
+    Écrit un micro-batch vers BigQuery et pousse les métriques vers Prometheus.
     """
     df_batch.cache()
+    start_time = time.time()
 
     try:
-        count = df_batch.count()  # ← Le UDF ML s'exécute ici, résultat mis en cache
+        count = df_batch.count()
 
         if count == 0:
             print(f"[Batch {batch_id}] Batch vide, ignoré.")
             return
+
+        try:
+            fraud_count = df_batch.filter(col("is_fraud") == 1).count()
+            
+            tx_counter.inc(count)
+            fraud_counter.inc(fraud_count)
+            
+            processing_time = time.time() - start_time
+            latency_gauge.set(processing_time)
+            
+            push_to_gateway('localhost:9091', job='spark_streaming', registry=registry)
+            
+            print(f"[Metrics] Total cumulé envoyé : {tx_counter._value._value} Tx, {fraud_counter._value._value} Fraudes")
+        except Exception as metric_err:
+            print(f"[Metrics Warning] Impossible d'atteindre le Pushgateway : {metric_err}")
+
 
         project_id = os.environ.get("PROJECT_ID", "").strip().strip('"')
         credentials_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "").strip().strip('"')
@@ -59,14 +83,14 @@ def write_batch_to_bigquery(df_batch, batch_id):
             .save()
         )
 
-        print(f"[Batch {batch_id}] ✅ {count} transactions insérées dans BigQuery.")
+        print(f"[Batch {batch_id}] {count} transactions insérées dans BigQuery.")
 
     except Exception as e:
-        print(f"[Batch {batch_id}] ❌ Erreur : {e}")
-        raise  # ← Re-raise pour que Spark gère le retry
+        print(f"[Batch {batch_id}] Erreur : {e}")
+        raise
 
     finally:
-        df_batch.unpersist()  # ← Libère la mémoire dans tous les cas
+        df_batch.unpersist()
 
 
 def start_bigquery_stream(df_parsed):

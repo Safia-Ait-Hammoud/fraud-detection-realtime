@@ -1,3 +1,4 @@
+import os
 import joblib
 import numpy as np
 import pandas as pd
@@ -5,11 +6,21 @@ from pathlib import Path
 from pyspark.sql.functions import pandas_udf, col
 from pyspark.sql.types import StructType, StructField, IntegerType, DoubleType
 
-# ─── 1. CHEMINS VERS LES FICHIERS SAUVEGARDÉS ───
+# ==============================================================================
+# 1. CHEMINS VERS LES FICHIERS SAUVEGARDÉS (Dynamique OS)
+# ==============================================================================
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-MODEL_DIR = Path("C:/fraud/ml-models/trained")
 
-# ─── 2. SEUILS FIXES (Tirés de l'exploration des données) ───
+if os.name == 'nt':
+    # Sur PC Windows : On utilise ton lien symbolique
+    MODEL_DIR = Path("C:/fraud/ml-models/trained")
+else:
+    # Dans Docker (Linux) : Le Dockerfile a copié les modèles dans /app/ml-models/trained
+    MODEL_DIR = Path("/app/ml-models/trained")
+
+# ==============================================================================
+# 2. SEUILS FIXES (Tirés de l'exploration des données)
+# ==============================================================================
 VELOCITY_MEDIAN = 2.0
 AMOUNT_Q75 = 242.48
 AMOUNT_BINS = [-np.inf, 39.35, 90.48, 160.39, 285.8, np.inf]
@@ -56,9 +67,9 @@ ml_output_schema = StructType(
     [StructField("is_fraud", IntegerType(), True), StructField("confidence_score", DoubleType(), True)]
 )
 
-# ─── 3. PANDAS UDF ───
-
-
+# ==============================================================================
+# 3. PANDAS UDF (L'inférence distribuée)
+# ==============================================================================
 @pandas_udf(ml_output_schema)
 def predict_fraud_udf(
     amount: pd.Series,
@@ -123,10 +134,9 @@ def predict_fraud_udf(
         }
     )
 
-
-# ─── 4. L'APPEL DE LA FONCTION POUR LE STREAMING ───
-
-
+# ==============================================================================
+# 4. L'APPEL DE LA FONCTION POUR LE STREAMING
+# ==============================================================================
 def apply_ml_model(df_transactions):
     """
     Applique le modèle au flux PySpark en temps réel.

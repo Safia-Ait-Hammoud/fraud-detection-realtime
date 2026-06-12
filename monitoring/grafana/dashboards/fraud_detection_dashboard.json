@@ -1,0 +1,67 @@
+{
+  "title": "Détection de Fraude - Surveillance Temps Réel",
+  "tags": ["fraude", "kafka", "spark"],
+  "timezone": "browser",
+  "refresh": "5s",
+  "panels": [
+    {
+      "title": "Panel 1: Débit d'Ingestion (Transactions/sec)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(kafka_server_BrokerTopicMetrics_MessagesInPerSec_total{topic=\"bank-transactions\"}[1m])",
+          "legendFormat": "Tx Entrantes / sec",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "fillOpacity": 10 } }
+      }
+    },
+    {
+      "title": "Panel 2: Fraudes Détectées (Temps Réel)",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(increase(kafka_server_BrokerTopicMetrics_MessagesInPerSec_total{topic=\"fraud-alerts\"}[5m]))",
+          "legendFormat": "Alertes",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } }
+      }
+    },
+    {
+      "title": "Panel 4: Taux de Fraude (%)",
+      "type": "gauge",
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 0 },
+      "targets": [
+        {
+          "expr": "(sum(rate(kafka_server_BrokerTopicMetrics_MessagesInPerSec_total{topic=\"fraud-alerts\"}[5m])) / sum(rate(kafka_server_BrokerTopicMetrics_MessagesInPerSec_total{topic=\"bank-transactions\"}[5m]))) * 100",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "percent", "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "orange", "value": 2 }, { "color": "red", "value": 5 } ] } }
+      }
+    },
+    {
+      "title": "Panel 3: Latence de traitement (Consumer Lag)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum by (topic) (kafka_server_FetcherLagMetrics_ConsumerLag)",
+          "legendFormat": "Messages en attente",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" } }
+      }
+    }
+  ]
+}

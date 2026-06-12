@@ -10,3 +10,8 @@ venv/
 *.csv
 
 gcp-credentials.json
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*

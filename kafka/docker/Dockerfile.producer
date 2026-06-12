@@ -1,0 +1,7 @@
+FROM python:3.11.9-slim-bookworm
+WORKDIR /app
+RUN pip install --no-cache-dir kafka-python python-dotenv
+COPY kafka/producer/kafka_producer.py ./
+COPY kafka/producer/transaction_simulator.py ./
+COPY kafka/producer/config.py ./
+CMD ["python", "kafka_producer.py"]
