@@ -10,7 +10,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
       "targets": [
         {
-          "expr": "rate(kafka_server_BrokerTopicMetrics_MessagesInPerSec_total{topic=\"bank-transactions\"}[1m])",
+          "expr": "sum(rate(transactions_processed_total[1m]))",
           "legendFormat": "Tx Entrantes / sec",
           "refId": "A"
         }
@@ -25,7 +25,7 @@
       "gridPos": { "h": 8, "w": 6, "x": 12, "y": 0 },
       "targets": [
         {
-          "expr": "sum(increase(kafka_server_BrokerTopicMetrics_MessagesInPerSec_total{topic=\"fraud-alerts\"}[5m]))",
+          "expr": "frauds_detected_total",
           "legendFormat": "Alertes",
           "refId": "A"
         }
@@ -40,7 +40,7 @@
       "gridPos": { "h": 8, "w": 6, "x": 18, "y": 0 },
       "targets": [
         {
-          "expr": "(sum(rate(kafka_server_BrokerTopicMetrics_MessagesInPerSec_total{topic=\"fraud-alerts\"}[5m])) / sum(rate(kafka_server_BrokerTopicMetrics_MessagesInPerSec_total{topic=\"bank-transactions\"}[5m]))) * 100",
+          "expr": "(sum(frauds_detected_total) / sum(transactions_processed_total)) * 100",
           "refId": "A"
         }
       ],
@@ -54,7 +54,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "targets": [
         {
-          "expr": "sum by (topic) (kafka_server_FetcherLagMetrics_ConsumerLag)",
+          "expr": "processing_latency_seconds",
           "legendFormat": "Messages en attente",
           "refId": "A"
         }
