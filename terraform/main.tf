@@ -19,7 +19,7 @@ resource "aws_security_group" "fraud_sg" {
   name        = "fraud_project_sg"
   description = "Autoriser SSH, API et Grafana"
 
-  # Accès SSH pour toi
+  # Accès SSH
   ingress {
     from_port   = 22
     to_port     = 22
@@ -27,7 +27,7 @@ resource "aws_security_group" "fraud_sg" {
     cidr_blocks = ["0.0.0.0/0"] 
   }
 
-  # Accès à ton API FastAPI
+  # Accès à API FastAPI
   ingress {
     from_port   = 8000
     to_port     = 8000
@@ -55,11 +55,10 @@ resource "aws_security_group" "fraud_sg" {
 # 4. Création de la Machine Virtuelle (Instance EC2)
 resource "aws_instance" "fraud_server" {
   ami           = data.aws_ami.ubuntu.id
-  instance_type = "t3.micro"
+  instance_type = "m7i-flex.large"
   
   vpc_security_group_ids = [aws_security_group.fraud_sg.id]
   
-  # REMPLACE par le nom de ta clé SSH créée sur AWS
   key_name = "fraud-project-key" 
 
   # Disque dur de 30 Go
@@ -68,7 +67,7 @@ resource "aws_instance" "fraud_server" {
     volume_type = "gp3"
   }
 
-  # 5. Le script de post-démarrage (L'astuce de la fausse RAM et Docker)
+  # 5. Le script de post-démarrage
   user_data = <<-EOF
               #!/bin/bash
               # Création du SWAP de 6 Go pour supporter Kafka et Spark

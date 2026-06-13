@@ -109,7 +109,6 @@ def predict_fraud_udf(
     df["amount_bin"] = pd.cut(df["amount"], bins=AMOUNT_BINS, labels=BIN_LABELS)
     df["amount_bin_enc"] = amount_enc.transform(df["amount_bin"].astype(str))
 
-    # (Sécurité pour éviter que le pipeline plante si un nouveau marchand apparaît)
     known_merchants = set(merchant_enc.classes_)
     df["merchant_category_enc"] = df["merchant_category"].apply(
         lambda x: merchant_enc.transform([x])[0] if x in known_merchants else 0
@@ -157,7 +156,6 @@ def apply_ml_model(df_transactions):
         ),
     )
 
-    # On éclate le résultat pour avoir des colonnes propres pour BigQuery
     df_final = (
         df_enrichi.withColumn("is_fraud", col("ml_results.is_fraud"))
         .withColumn("confidence_score", col("ml_results.confidence_score"))

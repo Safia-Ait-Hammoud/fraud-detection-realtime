@@ -4,7 +4,7 @@ type: "spark"
 app_name: "FraudDetection_Streaming_Pipeline"
 master: "local[*]"
 
-# Dépendances Maven (Le remède anti-JAR Hell)
+# Dépendances Maven
 dependencies:
   spark_version: "3.5.0"
   scala_version: "2.12"

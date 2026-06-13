@@ -22,10 +22,8 @@ def start_smart_stream():
     count = 0
     try:
         while True:
-            # On génère la transaction avec notre logique métier
             transaction = generate_smart_transaction()
             
-            # On l'envoie dans le tuyau Kafka
             producer.send(TOPIC_NAME, value=transaction)
             count += 1
             

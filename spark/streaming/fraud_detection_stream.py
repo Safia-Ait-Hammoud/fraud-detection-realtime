@@ -10,8 +10,6 @@ import sys
 # ==============================================================================
 # CONFIGURATION ENVIRONNEMENT (Dynamique OS)
 # ==============================================================================
-# Si on est sous Windows (Développement local), on force les chemins Windows.
-# Sous Docker (Linux), on ne fait rien, le conteneur gère ses propres chemins.
 if os.name == 'nt':
     VENV_PYTHON = "C:\\fraud\\venv\\Scripts\\python.exe"
     os.environ["PYSPARK_PYTHON"] = VENV_PYTHON

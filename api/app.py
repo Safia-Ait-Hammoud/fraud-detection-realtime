@@ -20,7 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Enregistrement des routes (C'est ça la clean architecture !)
+# Enregistrement des routes
 app.include_router(statistics.router)
 app.include_router(transactions.router)
 app.include_router(frauds.router)

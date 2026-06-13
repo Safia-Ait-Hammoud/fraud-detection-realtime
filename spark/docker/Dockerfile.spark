@@ -7,7 +7,6 @@ RUN apt-get update && apt-get install -y python3 python3-pip && rm -rf /var/lib/
 WORKDIR /app
 
 # Installation de PySpark et des librairies nécessaires
-# (On a bien gardé pyspark==3.5.0 pour éviter le conflit Scala)
 RUN pip install pyspark==3.5.0 kafka-python prometheus-client python-dotenv joblib scikit-learn pandas pyarrow pathlib xgboost
 
 # On copie tes scripts de streaming
